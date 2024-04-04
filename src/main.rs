@@ -2,6 +2,29 @@ use std::io::stdin;
 use terminal_size::{Width, Height, terminal_size};
 use rand::Rng;
 
+struct Steering {
+    left: String,
+    right :String
+}
+impl PartialEq for Steering {
+    fn eq(&self, other: &Self) -> bool {
+        self.left == other.left || self.left == other.right || self.right == other.right || self.right == other.left 
+    }
+}
+struct Player {
+    steering: Steering,
+    designate: String
+}
+impl PartialEq for Player {
+    fn eq(&self, other: &Self) -> bool {
+        self.steering == other.steering || self.designate == other.designate
+    }
+}
+struct Board {
+    w: u16,
+    h: u16
+}
+
 fn main() {
     print_header();
     let players = create_players();
@@ -10,36 +33,37 @@ fn main() {
 }
 
 fn print_board() {
-    let board_edges = get_board_size();
-    for i in [0..board_edges.0] {
-
-        for j in [0..board_edges.1] {
-
+    let board = get_board_size();
+    for i in 0..board.w {
+        for j in 0..board.h {
+            let random = rand::thread_rng().gen_range(0..100);
+            println!("{}-{}-{}", i, j, random);
         }
-    }
-
-fn get_board_size() -> (u16, u16) {
-    let size = terminal_size();
-    if let Some((Width(w), Height(h))) = size {
-        println!("Your terminal is {} cols wide and {} lines tall", w, h);
-        (w, h)
-    } else {
-        println!("Unable to get terminal size");
-        (10, 10)
-    }
-}    
-
-fn print_players_choice(players: &Vec<(String, String, String)>) {
-    for (index, player) in players.iter().enumerate() {
-        println!("player no. {} choose key `{}` for left and `{}` for right and `{}` to designate self", index+1, player.0, player.1, player.2);
     }
 }
 
-fn create_players() -> Vec<(String, String, String)> {
+fn get_board_size() -> Board {
+    let size = terminal_size();
+    if let Some((Width(w), Height(h))) = size {
+        println!("Your terminal is {} cols wide and {} lines tall", w, h);
+        Board { w: w, h: h }
+    } else {
+        println!("Unable to get terminal size");
+        Board { w: 10, h: 10 }
+    }
+}    
+
+fn print_players_choice(players: &Vec<Player>) {
+    for (index, player) in players.iter().enumerate() {
+        println!("player no. {} choose key `{}` for left and `{}` for right and `{}` to designate self", index+1, player.steering.left, player.steering.right, player.designate);
+    }
+}
+
+fn create_players() -> Vec<Player> {
 
     let players_number: u8 = get_players_number();
 
-    let mut players_steerings: Vec<(String, String, String)> = Vec::new();
+    let mut players_steerings: Vec<Player> = Vec::new();
 
     for i in 0..players_number {
         println!("Set steering for {} player", i+1);
@@ -67,23 +91,17 @@ fn get_players_number() -> u8 {
    players_count 
 }
 
-fn is_duplicate(holder: &Vec<(String, String, String)>, new_val: &(String, String, String)) -> bool {
+fn is_duplicate(holder: &Vec<Player>, new_val: &Player) -> bool {
     let mut is_duplicated = false;
-    let (x, y, z) = new_val;
     for holding in holder.iter() {
-        is_duplicated = 
-            holding.0 == *x ||
-            holding.1 == *x ||
-            holding.0 == *y ||
-            holding.1 == *y ||
-            holding.2 == *z;
+        is_duplicated = holding == new_val; 
         if is_duplicated  { break };
     }
 
     is_duplicated
 }
 
-fn get_users_steering_charset () -> (String, String, String) {
+fn get_users_steering_charset () -> Player {
     let mut answer = String::new();
     while answer.len() <= 2  {
         answer = get_input("enter 3 signs - first 2 will be your left|right steering keys, latter will identify you on a board");
@@ -92,7 +110,10 @@ fn get_users_steering_charset () -> (String, String, String) {
     let right = String::from(&answer[1..2]);
     let user = String::from(&answer[2..3]);
 
-    (left, right, user)
+    Player {
+        steering: Steering { left: left, right: right },
+        designate: user
+    }
 }
 
 fn get_input(prompt: &str) -> String {
