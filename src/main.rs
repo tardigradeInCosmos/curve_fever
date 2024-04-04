@@ -41,16 +41,22 @@ fn print_board() {
     let board = get_terminal_size();
     let rows = board.h;
     let cols = board.w;
+    print_rectangle(cols, rows);
+}
 
-    for i in 1..rows-1 {
+fn print_rectangle(width: u16, height: u16) {
+
+    for i in 2..=height {
         let mut printable_row = String::new().to_owned();
-        for j in 1..=cols {
-            let sign = match j {
-                1 => '|',
-                n if n == cols => '|',
+        for j in 1..=width {
+            let sign = match (i, j) {
+                (2, _n) => '_',
+                (_m, 1) => '|',
+                (_m, n) if n == width => '|',
+                (m, _n) if m == height => '_',
                 _ => ' '
             };
-            printable_row.push(sign);
+        printable_row.push(sign);
         }
         println!("{}", printable_row);
     }
@@ -100,7 +106,8 @@ fn get_players_number() -> u8 {
             Ok(num) => num,
             Err(_) => continue,
         };
-        break num;
+         if num > 0 break num;
+         continue;
     };
    players_count 
 }
