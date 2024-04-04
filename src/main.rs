@@ -106,7 +106,7 @@ fn get_players_number() -> u8 {
             Ok(num) => num,
             Err(_) => continue,
         };
-         if num > 0 break num;
+         if num > 0 { break num };
          continue;
     };
    players_count 
