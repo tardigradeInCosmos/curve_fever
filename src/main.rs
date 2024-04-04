@@ -32,17 +32,31 @@ fn main() {
     print_board();
 }
 
+fn get_random_number_from_range(bound: u16) -> u16 {
+    rand::thread_rng().gen_range(0..bound)
+
+}
+
 fn print_board() {
-    let board = get_board_size();
-    for i in 0..board.w {
-        for j in 0..board.h {
-            let random = rand::thread_rng().gen_range(0..100);
-            println!("{}-{}-{}", i, j, random);
+    let board = get_terminal_size();
+    let rows = board.h;
+    let cols = board.w;
+
+    for i in 1..rows-1 {
+        let mut printable_row = String::new().to_owned();
+        for j in 1..=cols {
+            let sign = match j {
+                1 => '|',
+                n if n == cols => '|',
+                _ => ' '
+            };
+            printable_row.push(sign);
         }
+        println!("{}", printable_row);
     }
 }
 
-fn get_board_size() -> Board {
+fn get_terminal_size() -> Board {
     let size = terminal_size();
     if let Some((Width(w), Height(h))) = size {
         println!("Your terminal is {} cols wide and {} lines tall", w, h);
