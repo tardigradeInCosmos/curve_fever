@@ -34,7 +34,7 @@ fn get_terminal_size() -> Board {
     let size = terminal_size();
     if let Some((Width(w), Height(h))) = size {
         println!("Your terminal is {} cols wide and {} lines tall", w, h);
-        Board { w: w, h: h }
+        Board { w, h }
     } else {
         println!("Unable to get terminal size");
         Board { w: 10, h: 10 }
