@@ -1,23 +1,51 @@
 use std::io::stdin;
-
-struct Steering {
-    left: String,
-    right :String
-}
-impl PartialEq for Steering {
-    fn eq(&self, other: &Self) -> bool {
-        self.left == other.left || self.left == other.right || self.right == other.right || self.right == other.left 
-    }
-}
+// ========================PLAYER IMPLEMENTATION==============================
 pub struct Player {
-    steering: Steering,
+    left: String,
+    right: String,
     designate: String
 }
+
 impl PartialEq for Player {
     fn eq(&self, other: &Self) -> bool {
-        self.steering == other.steering || self.designate == other.designate
+        self.designate == other.designate ||
+        self.right == other.right || 
+        self.left == other.left ||
+        self.right == other.left ||
+        self.left == other.right
     }
 }
+
+impl Player {
+    fn new(left: String, right: String, designate: String) -> Player {
+        Player {
+            left,
+            right,
+            designate
+        }
+    }
+    fn try_create(text: &str) -> Result<Player, &str> {
+        if text.len() <= 2 { return Err("To create user text must be 3 chars long") };
+        let mut left = String::new();
+        let mut right = String::new();
+        let mut designate = String::new();
+        
+        for (i, c) in text.chars().enumerate() {
+            match i {
+                0 => left.push(c),
+                1 => right.push(c),
+                2 => designate.push(c),
+                _ => continue
+            }
+        }
+
+        Ok(Player::new(left, right, designate))
+    }
+    fn is_valid(some_player: &Self) -> bool {
+        some_player.left != some_player.right
+    }
+}
+// =========================PLAYERS CREATION FOR USERS========================
 
 pub fn create_players() -> Vec<Player> {
 
@@ -28,7 +56,7 @@ pub fn create_players() -> Vec<Player> {
     for i in 0..players_number {
         println!("Set steering for {} player", i+1);
         let steering = loop {
-            let steering = get_users_steering_charset();
+            let steering = create_player();
             if !is_duplicate(&players_steerings, &steering) { break steering }
         };
         players_steerings.push(steering);
@@ -50,30 +78,20 @@ fn is_duplicate(holder: &Vec<Player>, new_val: &Player) -> bool {
 
 fn print_players_choice(players: &Vec<Player>) {
     for (index, player) in players.iter().enumerate() {
-        println!("player no. {} choose key `{}` for left and `{}` for right and `{}` to designate self", index+1, player.steering.left, player.steering.right, player.designate);
+        println!("player no. {} choose key `{}` for left and `{}` for right and `{}` to designate self", index+1, player.left, player.right, player.designate);
     }
 }
 
-fn get_users_steering_charset () -> Player {
-    let mut answer = String::new();
-    while answer.len() <= 2  {
-        answer = get_input("enter 3 signs - first 2 will be your left|right steering keys, latter will identify you on a board");
-    }
-    let left = String::from(&answer[0..1]);
-    let right = String::from(&answer[1..2]);
-    let user = String::from(&answer[2..3]);
-
-    Player {
-        steering: Steering { left: left, right: right },
-        designate: user
-    }
+fn create_player ()-> Player {
+    let prompt = "enter 3 signs - first 2 will be your left|right steering keys, latter will identify you on a board";
+    ask_until(prompt, Player::try_create, Player::is_valid)
 }
 
 
 fn get_players_number() -> u8 {
     let to_number = |x: &str| { x.trim().parse::<u8>() };
     let eligible_user_amount_condition = |num: &u8| { 
-    let max_users = 3;
+        let max_users = 3;
         *num > 0 && *num <= max_users
     };
     let prompt = "How many players there's going to be (max 3)?";
