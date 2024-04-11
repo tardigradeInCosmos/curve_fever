@@ -24,8 +24,8 @@ impl Player {
             designate
         }
     }
-    fn try_create(text: &str) -> Result<Player, &str> {
-        if text.len() <= 2 { return Err("To create user text must be 3 chars long") };
+    fn try_create(text: &str) -> Result<Player, String> {
+        if text.len() <= 2 { return Err("To create user text must be 3 chars long".to_string()) };
         let mut left = String::new();
         let mut right = String::new();
         let mut designate = String::new();
