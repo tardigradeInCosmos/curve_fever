@@ -19,38 +19,7 @@ impl PartialEq for Player {
     }
 }
 
-fn get_input(prompt: &str) -> String {
-    println!("{}", prompt);
-    let mut answer = String::new();
-    stdin()
-        .read_line(&mut answer)
-        .expect("Failed to read line");
-
-     answer
-}
-
-fn get_players_number() -> u8 {
-    let players_count = loop {
-
-        let num = get_input("How many players there's going to be (max 3)?");
-
-        let num: u8 = match num.trim().parse() {
-            Ok(num) => num,
-            Err(_) => continue,
-        };
-        if num > 0 && num <=3 { break num };
-        continue;
-    };
-    players_count 
-}
-
-fn print_players_choice(players: &Vec<Player>) {
-    for (index, player) in players.iter().enumerate() {
-        println!("player no. {} choose key `{}` for left and `{}` for right and `{}` to designate self", index+1, player.steering.left, player.steering.right, player.designate);
-    }
-}
-
- pub fn create_players() -> Vec<Player> {
+pub fn create_players() -> Vec<Player> {
 
     let players_number: u8 = get_players_number();
 
@@ -69,7 +38,6 @@ fn print_players_choice(players: &Vec<Player>) {
     players_steerings
 }
 
-
 fn is_duplicate(holder: &Vec<Player>, new_val: &Player) -> bool {
     let mut is_duplicated = false;
     for holding in holder.iter() {
@@ -78,6 +46,12 @@ fn is_duplicate(holder: &Vec<Player>, new_val: &Player) -> bool {
     }
 
     is_duplicated
+}
+
+fn print_players_choice(players: &Vec<Player>) {
+    for (index, player) in players.iter().enumerate() {
+        println!("player no. {} choose key `{}` for left and `{}` for right and `{}` to designate self", index+1, player.steering.left, player.steering.right, player.designate);
+    }
 }
 
 fn get_users_steering_charset () -> Player {
@@ -95,3 +69,44 @@ fn get_users_steering_charset () -> Player {
     }
 }
 
+
+fn get_players_number() -> u8 {
+    let to_number = |x: &str| { x.trim().parse::<u8>() };
+    let eligible_user_amount_condition = |num: u8| { 
+        let MAX_USERS = 3;
+        num > 0 && num <= MAX_USERS
+    };
+    let prompt = "How many players there's going to be (max 3)?";
+
+    let players_count = ask_until(prompt, Some(to_number), eligible_user_amount_condition);
+
+    players_count 
+}
+
+fn ask_until<T, E>(prompt: &str, parser: Option<impl FnOnce(&str) -> Result<T, E>>, condition: impl FnOnce(T) -> bool) -> T 
+    {
+           loop {
+                let val = get_input(prompt);
+                let formated = match parser {
+                    Some(format) => format(&val),
+                    None => Ok(val.trim())
+                };
+                
+                let to_check = match formated {
+                    Ok(check) => check,
+                    Err(_) => continue
+                };
+                
+                if condition(to_check) { break to_check }
+           }
+}
+
+fn get_input(prompt: &str) -> String {
+    println!("{}", prompt);
+    let mut answer = String::new();
+    stdin()
+        .read_line(&mut answer)
+        .expect("Failed to read line");
+
+     answer
+}
