@@ -72,32 +72,32 @@ fn get_users_steering_charset () -> Player {
 
 fn get_players_number() -> u8 {
     let to_number = |x: &str| { x.trim().parse::<u8>() };
-    let eligible_user_amount_condition = |num: u8| { 
-        let MAX_USERS = 3;
-        num > 0 && num <= MAX_USERS
+    let eligible_user_amount_condition = |num: &u8| { 
+    let max_users = 3;
+        *num > 0 && *num <= max_users
     };
     let prompt = "How many players there's going to be (max 3)?";
 
-    let players_count = ask_until(prompt, Some(to_number), eligible_user_amount_condition);
+    let players_count = ask_until(prompt, to_number, eligible_user_amount_condition);
 
     players_count 
 }
 
-fn ask_until<T, E>(prompt: &str, parser: Option<impl FnOnce(&str) -> Result<T, E>>, condition: impl FnOnce(T) -> bool) -> T 
+fn ask_until<T, E, P, C>(prompt: &str, parser: P, condition: C) -> T 
+    where
+        P: Fn(&str) -> Result<T, E>,
+        C: Fn(&T) -> bool
     {
            loop {
                 let val = get_input(prompt);
-                let formated = match parser {
-                    Some(format) => format(&val),
-                    None => Ok(val.trim())
-                };
+                let formated = parser(&val);
                 
                 let to_check = match formated {
                     Ok(check) => check,
                     Err(_) => continue
                 };
                 
-                if condition(to_check) { break to_check }
+                if condition(&to_check) { break to_check }
            }
 }
 
