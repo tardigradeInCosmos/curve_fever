@@ -1,5 +1,6 @@
 use std::fmt;
 
+#[derive(Debug)]
 pub struct Player {
     left: String,
     right: String,
@@ -23,7 +24,7 @@ impl fmt::Display for Player {
 }
 
 impl Player {
-    pub fn new(left: String, right: String, designate: String) -> Player {
+    fn new(left: String, right: String, designate: String) -> Player {
         Player {
             left,
             right,
@@ -32,6 +33,8 @@ impl Player {
     }
     pub fn try_create(text: &str) -> Result<Player, String> {
         if text.len() <= 2 { return Err("To create user text must be 3 chars long".to_string()) };
+        if text.get(0..1) == text.get(1..2) { return Err("Can not use same key for both site steering".to_string()) };
+
         let mut left = String::new();
         let mut right = String::new();
         let mut designate = String::new();
@@ -52,6 +55,7 @@ impl Player {
     }
 }
 
+#[derive(Debug)] 
 pub struct PlayersBench {
     players: Vec<Player>
 }
@@ -81,5 +85,57 @@ impl PlayersBench {
         for (index, player) in self.players.iter().enumerate() {
             println!("player no. {} choice is {}", index+1, player);
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn try_create_player_should_result_with_error_if_string_shorter_than_3_0() {
+        assert_eq!(Player::try_create(""), Err("To create user text must be 3 chars long".to_string()));
+    }
+    #[test]
+    fn try_create_player_should_result_with_error_if_string_shorter_than_3_1() {
+        assert_eq!(Player::try_create("1"), Err("To create user text must be 3 chars long".to_string()));
+    }
+    #[test]
+    fn try_create_player_should_result_with_error_if_string_shorter_than_3_2() {
+        assert_eq!(Player::try_create("12"), Err("To create user text must be 3 chars long".to_string()));
+    }
+    #[test]
+    fn try_create_player_should_result_ok_given_3_or_more_chars() {
+        assert_eq!(Player::try_create("123"), Ok(Player {left: "1".to_string(), right: "2".to_string(), designate: "3".to_string()}));
+    }
+    #[test]
+    fn try_create_player_should_result_error_given_string_with_duplicates_on_2_first_places() {
+        assert_eq!(Player::try_create("111"), Err("Can not use same key for both site steering".to_string()));
+    }
+    #[test]
+    fn is_valid_truthy_when_steerings_different_0() {
+        let (left, right, designate) = ("a".to_string(), "b".to_string(), "b".to_string() );
+        assert_eq!(Player::is_valid(&Player { left, right, designate }), true);
+    }
+    #[test]
+    fn is_valid_truthy_when_steerings_different_1() {
+        let (left, right, designate) = ("a".to_string(), "b".to_string(), "a".to_string() );
+        assert_eq!(Player::is_valid(&Player { left, right, designate }), true);
+    }
+    #[test]
+    fn is_valid_truthy_when_steerings_different_2() {
+        let (left, right, designate) = ("a".to_string(), "b".to_string(), "c".to_string() );
+        assert_eq!(Player::is_valid(&Player { left, right, designate }), true);
+    }
+    #[test]
+    fn is_valid_falsy_when_steerings_same() {
+        let (left, right, designate) = ("a".to_string(), "a".to_string(), "c".to_string());
+        assert_eq!(Player::is_valid(&Player { left, right, designate }), false);
+    }
+    #[test]
+    fn player_to_string() {
+        let (left, right, designate) = ("a".to_string(), "b".to_string(), "c".to_string() );
+        let player = Player { left, right, designate };
+        assert_eq!(player.to_string(), "left key `a`; right key `b`; users designate `c`".to_string());
     }
 }
