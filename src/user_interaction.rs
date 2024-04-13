@@ -1,4 +1,5 @@
 use std::io::stdin;
+use std::fmt;
 // ========================PLAYER IMPLEMENTATION==============================
 pub struct Player {
     left: String,
@@ -13,6 +14,12 @@ impl PartialEq for Player {
         self.left == other.left ||
         self.right == other.left ||
         self.left == other.right
+    }
+}
+
+impl fmt::Display for Player {
+     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "left key `{}`; right key `{}`; users designate `{}`", self.left, self.right, self.designate)
     }
 }
 
@@ -45,42 +52,64 @@ impl Player {
         some_player.left != some_player.right
     }
 }
+
+pub struct PlayersBench {
+    players: Vec<Player>
+}
+
+impl PlayersBench {
+    fn new() -> Self {
+        let players: Vec<Player> = Vec::new();
+        PlayersBench { players }
+    }
+
+    fn add_player(&mut self, player: Player) -> Result<u8, String> {
+        if self.is_duplicate(&player) { return Err("user is overlappin else's keys".to_string()) }
+
+        self.players.push(player);
+        self.players.len().try_into().or_else(|_| return Err("players aggregator corrupted".to_string()))
+    }
+    fn is_duplicate(&self, new_val: &Player) -> bool {
+        let mut is_duplicated = false;
+        for holding in self.players.iter() {
+            is_duplicated = holding == new_val; 
+            if is_duplicated  { break };
+        }
+
+        is_duplicated
+    }
+    fn print_players_choice(&self) {
+        for (index, player) in self.players.iter().enumerate() {
+            println!("player no. {} choice is {}", index+1, player);
+        }
+    }
+}
 // =========================PLAYERS CREATION FOR USERS========================
 
-pub fn create_players() -> Vec<Player> {
-
+pub fn create_players() -> PlayersBench {
+    let mut players_bench = PlayersBench::new();
     let players_number: u8 = get_players_number();
 
-    let mut players_steerings: Vec<Player> = Vec::new();
-
     for i in 0..players_number {
-        println!("Set steering for {} player", i+1);
-        let steering = loop {
-            let steering = create_player();
-            if !is_duplicate(&players_steerings, &steering) { break steering }
-        };
-        players_steerings.push(steering);
+        loop {
+            println!("Set steering for {} player", i+1);
+            let player = create_player();
+            match players_bench.add_player(player) {
+                Ok(players_amount) => {
+                    println!("successfully added player, amount of players: {}", players_amount);
+                    break
+                 },
+                 Err(msg) => {
+                    println!("could not add player due to {}", msg);
+                    continue
+                 }
+            }
+        }
     }
-    print_players_choice(&players_steerings);
-
-    players_steerings
+    players_bench.print_players_choice();
+    players_bench
 }
 
-fn is_duplicate(holder: &Vec<Player>, new_val: &Player) -> bool {
-    let mut is_duplicated = false;
-    for holding in holder.iter() {
-        is_duplicated = holding == new_val; 
-        if is_duplicated  { break };
-    }
-
-    is_duplicated
-}
-
-fn print_players_choice(players: &Vec<Player>) {
-    for (index, player) in players.iter().enumerate() {
-        println!("player no. {} choose key `{}` for left and `{}` for right and `{}` to designate self", index+1, player.left, player.right, player.designate);
-    }
-}
 
 fn create_player ()-> Player {
     let prompt = "enter 3 signs - first 2 will be your left|right steering keys, latter will identify you on a board";
@@ -96,9 +125,7 @@ fn get_players_number() -> u8 {
     };
     let prompt = "How many players there's going to be (max 3)?";
 
-    let players_count = ask_until(prompt, to_number, eligible_user_amount_condition);
-
-    players_count 
+    ask_until(prompt, to_number, eligible_user_amount_condition)
 }
 
 fn ask_until<T, E, P, C>(prompt: &str, parser: P, condition: C) -> T 
