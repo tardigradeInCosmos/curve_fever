@@ -2,13 +2,14 @@ mod view;
 mod user_interaction;
 
 use rand::Rng;
-use view::{print_header, print_board};
+use view::{Board, print_header};
 use user_interaction::create_players;
 
 fn main() {
     print_header();
     create_players();
-    print_board();
+    let b = Board::new();
+    print!("{}", b);
 }
 
 fn get_random_number_from_range(bound: u16) -> u16 {
