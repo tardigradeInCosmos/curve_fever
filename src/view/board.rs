@@ -15,7 +15,7 @@ impl fmt::Display for Board {
 }
 
 impl Board {
-    pub fn new(ts: TerminalSize) -> Board {
+    pub fn new() -> Board {
         let size = terminal_size();
         if let Some((Width(w), Height(h))) = size {
             println!("Your terminal is {} cols wide and {} lines tall", w, h);
