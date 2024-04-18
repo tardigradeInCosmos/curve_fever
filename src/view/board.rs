@@ -1,11 +1,18 @@
 use std::fmt;
 use terminal_size::{terminal_size, Width, Height};
+use mockall::automock;
+
+#[automock]
+pub trait TerminalSizeAcquisitor {
+    fn get(&self) -> Option<(Width, Height)> {
+        terminal_size()
+    }
+}
 
 pub struct Board {
     w: u16,
     h: u16
 }
-
 
 impl fmt::Display for Board {
      fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -15,8 +22,7 @@ impl fmt::Display for Board {
 }
 
 impl Board {
-    pub fn new() -> Board {
-        let size = terminal_size();
+    fn new(size: Option<(Width, Height)>) -> Board {
         if let Some((Width(w), Height(h))) = size {
             println!("Your terminal is {} cols wide and {} lines tall", w, h);
             Board { w, h }
@@ -24,6 +30,11 @@ impl Board {
             println!("Unable to get terminal size yout board is going to be 10x10");
             Board { w: 10, h: 10 }
         }
+    }
+
+    pub fn build_with(tsa: impl TerminalSizeAcquisitor) -> Board {
+        let size_option = tsa.get();
+        Self::new(size_option)
     }
 
     fn create_printable(&self) -> String {
@@ -49,14 +60,5 @@ impl Board {
 }
 
 #[cfg(test)]
-// #[path = "./test.rs" ]
-mod test {
-    use super::*;
-
-    #[test]
-    fn board_new_terminal_size_inaccesible() {
-        let b = Board::new();
-        assert_eq!(b.w, 10u16, "board width value expected to match 10, got {}", b.w);
-        assert_eq!(b.h, 10u16, "board height value expected to match 10, got {}", b.h);
-    }
-} 
+#[path = "./test.rs" ]
+mod test; 
