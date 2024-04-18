@@ -1,10 +1,11 @@
 use std::fmt;
-use self::terminal_size_fac::{TerminalSize, Width, Height};
+use terminal_size::{terminal_size, Width, Height};
 
 pub struct Board {
     w: u16,
     h: u16
 }
+
 
 impl fmt::Display for Board {
      fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -14,8 +15,8 @@ impl fmt::Display for Board {
 }
 
 impl Board {
-    pub fn new() -> Board {
-        let size = TerminalSize::get();
+    pub fn new(ts: TerminalSize) -> Board {
+        let size = terminal_size();
         if let Some((Width(w), Height(h))) = size {
             println!("Your terminal is {} cols wide and {} lines tall", w, h);
             Board { w, h }
@@ -47,17 +48,15 @@ impl Board {
     }
 }
 
-mod terminal_size_fac {
-    use terminal_size::terminal_size;
-    pub use terminal_size::{Width, Height};
-    pub struct TerminalSize {}
-    impl TerminalSize {
-        pub fn get() -> Option<(Width, Height)> {
-            terminal_size()
-        }
-    }
-}
-
 #[cfg(test)]
-#[path = "./test.rs" ]
-mod test; 
+// #[path = "./test.rs" ]
+mod test {
+    use super::*;
+
+    #[test]
+    fn board_new_terminal_size_inaccesible() {
+        let b = Board::new();
+        assert_eq!(b.w, 10u16, "board width value expected to match 10, got {}", b.w);
+        assert_eq!(b.h, 10u16, "board height value expected to match 10, got {}", b.h);
+    }
+} 
