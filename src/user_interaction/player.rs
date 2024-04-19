@@ -91,7 +91,7 @@ impl PlayersBench {
         self.players
             .len()
             .try_into()
-            .or_else(|_| return Err("players aggregator corrupted".to_string()))
+            .map_err(|_| "players aggregator corrupted".to_string())
     }
     fn is_duplicate(&self, new_val: &Player) -> bool {
         let mut is_duplicated = false;

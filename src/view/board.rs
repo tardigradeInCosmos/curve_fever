@@ -23,10 +23,7 @@ impl Board {
     }
 
     fn build_with(tsa: impl TerminalSizeAcquisitor) -> Option<Board> {
-        match tsa.get() {
-            None => return None,
-            Some(size) => return Some(Self::new(size)),
-        }
+        tsa.get().map(Self::new)
     }
 
     pub fn build() -> Option<Board> {
@@ -36,6 +33,7 @@ impl Board {
     fn create_printable(&self) -> String {
         let width = self.w;
         let height = self.h;
+        let new_line = 0xA as char;
 
         let mut buff = String::new();
         for i in 2..=height {
@@ -49,7 +47,7 @@ impl Board {
                 };
                 buff.push(sign);
             }
-            buff.push(0xA as char);
+            buff.push(new_line);
         }
         buff
     }
