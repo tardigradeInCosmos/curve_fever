@@ -1,13 +1,7 @@
-use std::fmt;
-use terminal_size::{terminal_size, Width, Height};
-use mockall::automock;
+mod terminal;
 
-#[automock]
-pub trait TerminalSizeAcquisitor {
-    fn get(&self) -> Option<(Width, Height)> {
-        terminal_size()
-    }
-}
+use std::fmt;
+pub use crate::view::board::terminal::{Width, Height, Terminal, TerminalSizeAcquisitor};
 
 pub struct Board {
     w: u16,
@@ -22,19 +16,21 @@ impl fmt::Display for Board {
 }
 
 impl Board {
-    fn new(size: Option<(Width, Height)>) -> Board {
-        if let Some((Width(w), Height(h))) = size {
-            println!("Your terminal is {} cols wide and {} lines tall", w, h);
-            Board { w, h }
-        } else {
-            println!("Unable to get terminal size yout board is going to be 10x10");
-            Board { w: 10, h: 10 }
+    fn new(size: (Width, Height)) -> Board {
+        let (Width(w), Height(h)) = size;
+        println!("Your terminal is {} cols wide and {} lines tall", w, h);
+        Board { w, h }
+    }
+
+    fn build_with(tsa: impl TerminalSizeAcquisitor) -> Option<Board> {
+        match tsa.get() {
+            None => return None,
+            Some(size) => return Some(Self::new(size))
         }
     }
 
-    pub fn build_with(tsa: impl TerminalSizeAcquisitor) -> Board {
-        let size_option = tsa.get();
-        Self::new(size_option)
+    pub fn build() -> Option<Board> {
+        Self::build_with(Terminal {})
     }
 
     fn create_printable(&self) -> String {

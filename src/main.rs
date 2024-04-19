@@ -8,7 +8,7 @@ use user_interaction::create_players;
 fn main() {
     print_header();
     create_players();
-    let b = Board::new();
+    let b = Board::build().unwrap();
     print!("{}", b);
 }
 
