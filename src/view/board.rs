@@ -1,17 +1,17 @@
 mod terminal;
 
+pub use crate::view::board::terminal::{Height, Terminal, TerminalSizeAcquisitor, Width};
 use std::fmt;
-pub use crate::view::board::terminal::{Width, Height, Terminal, TerminalSizeAcquisitor};
 
 pub struct Board {
     w: u16,
-    h: u16
+    h: u16,
 }
 
 impl fmt::Display for Board {
-     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-         let printable_board = self.create_printable();
-         write!(f, "{}", printable_board)
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let printable_board = self.create_printable();
+        write!(f, "{}", printable_board)
     }
 }
 
@@ -25,7 +25,7 @@ impl Board {
     fn build_with(tsa: impl TerminalSizeAcquisitor) -> Option<Board> {
         match tsa.get() {
             None => return None,
-            Some(size) => return Some(Self::new(size))
+            Some(size) => return Some(Self::new(size)),
         }
     }
 
@@ -37,7 +37,7 @@ impl Board {
         let width = self.w;
         let height = self.h;
 
-        let mut buff = String::new(); 
+        let mut buff = String::new();
         for i in 2..=height {
             for j in 1..=width {
                 let sign = match (i, j) {
@@ -45,9 +45,9 @@ impl Board {
                     (_m, 1) => '|',
                     (_m, n) if n == width => '|',
                     (m, _n) if m == height => '_',
-                    _ => ' '
+                    _ => ' ',
                 };
-                 buff.push(sign);
+                buff.push(sign);
             }
             buff.push(0xA as char);
         }
@@ -56,5 +56,5 @@ impl Board {
 }
 
 #[cfg(test)]
-#[path = "./test.rs" ]
-mod test; 
+#[path = "./test.rs"]
+mod test;

@@ -1,9 +1,9 @@
-mod view;
 mod user_interaction;
+mod view;
 
 use rand::Rng;
-use view::{Board, print_header};
 use user_interaction::create_players;
+use view::{print_header, Board};
 
 fn main() {
     print_header();
@@ -15,4 +15,3 @@ fn main() {
 fn get_random_number_from_range(bound: u16) -> u16 {
     rand::thread_rng().gen_range(0..bound)
 }
-

@@ -1,6 +1,6 @@
 use mockall::automock;
 use terminal_size::terminal_size;
-pub use terminal_size::{Width, Height};
+pub use terminal_size::{Height, Width};
 
 #[automock]
 pub trait TerminalSizeAcquisitor {
