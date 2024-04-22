@@ -1,7 +1,8 @@
 mod player;
+mod interaction;
 
+use crate::user_interaction::interaction::ask_until;
 use crate::user_interaction::player::{Player, PlayersBench};
-use std::io::stdin;
 
 pub fn create_players() -> PlayersBench {
     let mut players_bench = PlayersBench::new();
@@ -46,30 +47,3 @@ fn get_players_number() -> u8 {
     ask_until(prompt, to_number, eligible_user_amount_condition)
 }
 
-fn ask_until<T, E, P, C>(prompt: &str, parser: P, condition: C) -> T
-where
-    P: Fn(&str) -> Result<T, E>,
-    C: Fn(&T) -> bool,
-{
-    loop {
-        let val = get_input(prompt);
-        let formated = parser(&val);
-
-        let to_check = match formated {
-            Ok(check) => check,
-            Err(_) => continue,
-        };
-
-        if condition(&to_check) {
-            break to_check;
-        }
-    }
-}
-
-fn get_input(prompt: &str) -> String {
-    println!("{}", prompt);
-    let mut answer = String::new();
-    stdin().read_line(&mut answer).expect("Failed to read line");
-
-    answer
-}
