@@ -2,7 +2,7 @@ mod player;
 mod interaction;
 
 use crate::user_interaction::interaction::ask_until;
-use crate::user_interaction::player::{Player, PlayersBench};
+pub use crate::user_interaction::player::{Player, PlayersBench};
 
 pub fn create_players() -> PlayersBench {
     let mut players_bench = PlayersBench::new();

@@ -70,7 +70,7 @@ impl Player {
 
 #[derive(Debug)]
 pub struct PlayersBench {
-    players: Vec<Player>,
+    pub players: Vec<Player>,
 }
 
 impl PlayersBench {
