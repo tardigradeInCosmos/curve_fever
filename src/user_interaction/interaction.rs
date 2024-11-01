@@ -1,4 +1,6 @@
 use std::io::stdin;
+use sdl3::event::Event;
+use sdl3::keyboard::Keycode;
 
 pub fn ask_until<T, E, P, C>(prompt: &str, parser: P, condition: C) -> T
 where
@@ -6,10 +8,7 @@ where
     C: Fn(&T) -> bool,
 {
     loop {
-        let val = get_input(prompt);
-        let formated = parser(&val);
-
-        let to_check = match formated {
+        let to_check = match parser(&get_input(prompt)) {
             Ok(check) => check,
             Err(_) => continue,
         };
@@ -26,4 +25,12 @@ fn get_input(prompt: &str) -> String {
     stdin().read_line(&mut answer).expect("Failed to read line");
 
     answer
+}
+
+pub fn handle_key_input(event: Event) {
+    match event {
+        Event::Quit {..} |
+        Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {} |
+        _ => {}
+    }
 }
